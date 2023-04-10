@@ -1,6 +1,7 @@
 ## Prompt AI
 
 Simple TUI prompt aiming at integrating with Chat GPT and more.
+![TUI example](https://github.com/noboruma/prompt-ai/blob/main/.github/presentation.png?raw=true)
 
 ## Prerequisites
 
