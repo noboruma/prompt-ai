@@ -21,5 +21,5 @@ $ go install github.com/noboruma/prompt-ai@latest
 Find your key [here](https://platform.openai.com/account/api-keys)
 
 ```
-$ API_KEY=blah go run ./main.go
+$ API_KEY=blah prompt-ai
 ```
