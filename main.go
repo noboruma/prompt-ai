@@ -57,6 +57,8 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 		SetLabel(prompt.DefaultPrompt).
 		SetPlaceholder("E.g. why is 42 the answer")
 
+	prev_ans := ""
+
 	var sb strings.Builder
 	inputTextArea.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
@@ -65,7 +67,7 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 			go func() {
 				defer inputTextArea.SetDisabled(false)
 				defer func() { spinctl <- struct{}{} }()
-				responses, err := ais.SendPrompt(inputTextArea.GetText(), 100)
+				responses, err := ais.SendPrompt(inputTextArea.GetText(), prev_ans, 100)
 				if err != nil {
 					errorLog(err.Error())
 					return
@@ -76,7 +78,8 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 				sb.WriteString(inputTextArea.GetText())
 				sb.WriteString("\n")
 
-				sections := str.ExtractMarkdownSections(strings.Join(responses, "\n"))
+				prev_ans = strings.Join(responses, "\n")
+				sections := str.ExtractMarkdownSections(prev_ans)
 				for i := range sections {
 					if sections[i].Markdown {
 						id := copy_clipboards.Append(sections[i].Content)

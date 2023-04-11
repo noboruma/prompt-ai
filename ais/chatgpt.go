@@ -39,13 +39,16 @@ type PromptRequest struct {
 	Messages []Message `json:"messages"`
 }
 
-func SendPrompt(prompt string, max_tokens int) ([]string, error) {
+func SendPrompt(prompt, prev_ans string, max_tokens int) ([]string, error) {
 	res := []string{}
 	url := "https://api.openai.com/v1/chat/completions"
 
 	PromptRequest := PromptRequest{
-		Model:    "gpt-3.5-turbo",
-		Messages: []Message{{Role: "user", Content: prompt}},
+		Model: "gpt-3.5-turbo",
+		Messages: []Message{
+			{Role: "assistant", Content: prev_ans},
+			{Role: "user", Content: prompt},
+		},
 	}
 
 	b, err := json.Marshal(PromptRequest)
