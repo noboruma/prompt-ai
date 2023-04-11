@@ -3,6 +3,7 @@ package ais
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -18,9 +19,9 @@ var (
 var apiKey string
 
 func init() {
-	apiKey = os.Getenv("API_KEY")
+	apiKey = os.Getenv("OPENAI_KEY")
 	if apiKey == "" {
-		log.Fatal("API_KEY not set")
+		log.Fatal("OPENAI_KEY not set")
 	}
 }
 
@@ -86,6 +87,10 @@ func SendPrompt(prompt string, max_tokens int) ([]string, error) {
 	for i := range r.Choices {
 		res = append(res, r.Choices[i].Message.Content)
 	}
+
+	if len(res) == 0 {
+		return res, errors.New("Communication failed")
+	}
 	return res, nil
 }
 
@@ -125,7 +130,6 @@ func ListEngines() ([]Engine, error) {
 	if err != nil {
 		return res, err
 	}
-	fmt.Println(string(body))
 
 	listresp := ListEnginesResponse{}
 	err = json.Unmarshal(body, &listresp)
@@ -159,7 +163,6 @@ func GetOpenAIQuotaUsage() (QuotaUsage, error) {
 		return QuotaUsage{}, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
-	fmt.Printf("%v\n", resp)
 
 	var usage struct {
 		UsageUsd float64 `json:"current_usage_usd"`

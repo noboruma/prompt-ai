@@ -27,26 +27,29 @@ func prepareChatViewSection() *tview.TextView {
 
 func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_clipboards *clipboards.CopyClipboards) *tview.Flex {
 
-	errorText := tview.NewTextView()
+	errorText := tview.NewTextView().
+		SetScrollable(false).
+		SetToggleHighlights(false).
+		SetWordWrap(true)
 	errorText.SetTextColor(tcell.ColorRed)
+	errorLog := func(msg string) {
+		app.QueueUpdateDraw(func() {
+			errorText.SetText(msg)
+		})
+	}
 	statusText := tview.NewTextView().
 		SetScrollable(false).
 		SetToggleHighlights(false).
 		SetDynamicColors(true).
 		SetRegions(true).
 		SetWordWrap(true)
-	errorLog := func(msg string) {
-		app.QueueUpdateDraw(func() {
-			errorText.SetText(msg)
-		})
-	}
 
 	updateQuota := func() {
 		usage, err := ais.GetOpenAIQuotaUsage()
 		if err != nil {
 			errorLog(err.Error())
 		}
-		fmt.Fprintf(statusText, "[yellow]Usage: $%v", usage.Used)
+		statusText.SetText(fmt.Sprintf("[yellow]Usage: $%v", usage.Used))
 	}
 	updateQuota()
 
@@ -64,10 +67,10 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 				defer func() { spinctl <- struct{}{} }()
 				responses, err := ais.SendPrompt(inputTextArea.GetText(), 100)
 				if err != nil {
-					chatView.SetText(err.Error())
-					chatView.SetBackgroundColor(tcell.ColorRed)
+					errorLog(err.Error())
 					return
 				}
+				errorLog("")
 
 				sb.WriteString("[yellow]>>")
 				sb.WriteString(inputTextArea.GetText())
@@ -92,6 +95,7 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 				sb.WriteString("\n")
 				chatView.SetText(sb.String())
 				inputTextArea.SetText("")
+				updateQuota()
 			}()
 		}
 	})
@@ -104,7 +108,8 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 		AddItem(tview.NewTextView().
 			SetDynamicColors(true).
 			SetText("[green]TAB[white]: switch panes"), 0, 1, false).
-		AddItem(statusText, 0, 1, true)
+		AddItem(statusText, 0, 1, false).
+		AddItem(errorText, 0, 1, false)
 
 	inputField.SetBorder(true).SetTitle("Input")
 	return inputField
@@ -138,7 +143,7 @@ func main() {
 	mainLayout := tview.NewFlex().
 		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
 			AddItem(chatView, 0, 2, false).
-			AddItem(inputField, 6, 1, true), 0, 1, true)
+			AddItem(inputField, 7, 1, true), 0, 1, true)
 
 	if err := app.SetRoot(mainLayout, true).EnableMouse(true).Run(); err != nil {
 		panic(err)

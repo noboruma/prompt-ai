@@ -18,8 +18,14 @@ $ go install github.com/noboruma/prompt-ai@latest
 ```
 
 ## Usage
-Find your key [here](https://platform.openai.com/account/api-keys)
+Find your key `<API_KEY>` [here](https://platform.openai.com/account/api-keys)
+Then run:
 
 ```
-$ API_KEY=blah prompt-ai
+$ OPENAI_KEY=<API_KEY> prompt-ai
+```
+or
+```
+$ export OPENAI_KEY=<API_KEY>
+$ prompt-ai
 ```
