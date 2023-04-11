@@ -16,12 +16,16 @@ var (
 	http_timeout = 30 * time.Second
 )
 
+const (
+	API_KEY_ENV = "OPENAI_API_KEY"
+)
+
 var apiKey string
 
 func init() {
-	apiKey = os.Getenv("OPENAI_KEY")
+	apiKey = os.Getenv(API_KEY_ENV)
 	if apiKey == "" {
-		log.Fatal("OPENAI_KEY not set")
+		log.Fatalf("%s not set\n", API_KEY_ENV)
 	}
 }
 

@@ -22,10 +22,10 @@ Find your key `<API_KEY>` [here](https://platform.openai.com/account/api-keys)
 Then run:
 
 ```
-$ OPENAI_KEY=<API_KEY> prompt-ai
+$ OPENAI_API_KEY=<API_KEY> prompt-ai
 ```
 or
 ```
-$ export OPENAI_KEY=<API_KEY>
+$ export OPENAI_API_KEY=<API_KEY>
 $ prompt-ai
 ```
