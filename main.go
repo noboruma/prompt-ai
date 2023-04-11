@@ -25,7 +25,7 @@ func prepareChatViewSection() *tview.TextView {
 	return chatView
 }
 
-func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_clipboards *clipboards.CopyClipboards) *tview.Flex {
+func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_clipboards *clipboards.Clipboards) *tview.Flex {
 
 	errorText := tview.NewTextView().
 		SetScrollable(false).
@@ -117,15 +117,17 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 
 func main() {
 
-	copy_clipboards := clipboards.NewCopyClipboards()
+	clipboards := clipboards.NewClipboards()
+
 	app := tview.NewApplication()
+
 	chatView := prepareChatViewSection()
 
-	inputField := prepareInputSection(app, chatView, &copy_clipboards)
+	inputField := prepareInputSection(app, chatView, &clipboards)
 	inputField.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		key := event.Key()
 		if key >= tcell.KeyF1 && key <= tcell.KeyF8 {
-			copy_clipboards.Fetch(int(key - tcell.KeyF1))
+			clipboards.Fetch(int(key - tcell.KeyF1))
 		} else if key == tcell.KeyTab {
 			app.SetFocus(chatView)
 		}
