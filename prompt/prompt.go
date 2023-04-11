@@ -26,7 +26,6 @@ func StartSpinner(app *tview.Application, spinner *tview.InputField) chan struct
 	main:
 		for {
 			for _, frame := range frames {
-				// Set the text of the text view to the current frame.
 				app.QueueUpdateDraw(func() {
 					spinner.SetLabel(frame)
 				})

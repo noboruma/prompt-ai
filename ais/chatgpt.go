@@ -8,6 +8,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
+)
+
+var (
+	http_timeout = 30 * time.Second
 )
 
 var apiKey string
@@ -50,7 +55,9 @@ func SendPrompt(prompt string, max_tokens int) ([]string, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: http_timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return res, err
@@ -104,7 +111,9 @@ func ListEngines() ([]Engine, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: http_timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return res, err
@@ -142,7 +151,9 @@ func GetOpenAIQuotaUsage() (QuotaUsage, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: http_timeout,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return QuotaUsage{}, fmt.Errorf("error making request: %v", err)

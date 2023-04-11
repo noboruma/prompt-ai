@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -25,7 +26,6 @@ func prepareChatViewSection() *tview.TextView {
 }
 
 func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_clipboards *clipboards.CopyClipboards) *tview.Flex {
-	chat_history := ""
 
 	errorText := tview.NewTextView()
 	errorText.SetTextColor(tcell.ColorRed)
@@ -36,7 +36,9 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 		SetRegions(true).
 		SetWordWrap(true)
 	errorLog := func(msg string) {
-		errorText.SetText(msg)
+		app.QueueUpdateDraw(func() {
+			errorText.SetText(msg)
+		})
 	}
 
 	updateQuota := func() {
@@ -52,6 +54,7 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 		SetLabel(prompt.DefaultPrompt).
 		SetPlaceholder("E.g. why is 42 the answer")
 
+	var sb strings.Builder
 	inputTextArea.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
 			inputTextArea.SetDisabled(true)
@@ -65,21 +68,29 @@ func prepareInputSection(app *tview.Application, chatView *tview.TextView, copy_
 					chatView.SetBackgroundColor(tcell.ColorRed)
 					return
 				}
-				tmp := strings.Join(responses, "\n")
-				chat_history += "[yellow]>>" + inputTextArea.GetText() + "\n[white]"
 
-				sections := str.ExtractMarkdownSections(tmp)
+				sb.WriteString("[yellow]>>")
+				sb.WriteString(inputTextArea.GetText())
+				sb.WriteString("\n")
+
+				sections := str.ExtractMarkdownSections(strings.Join(responses, "\n"))
 				for i := range sections {
 					if sections[i].Markdown {
 						id := copy_clipboards.Append(sections[i].Content)
-						chat_history += "[green]" + fmt.Sprintf("[F%d]", id+1) + "\n---[blue]"
-						chat_history += sections[i].Content + "---[white]"
+						sb.WriteString("[green]")
+						sb.WriteString("[F")
+						sb.WriteString(strconv.Itoa(id + 1))
+						sb.WriteString("]")
+						sb.WriteString("\n---[blue]")
+						sb.WriteString(tview.Escape(sections[i].Content))
+						sb.WriteString("[green]---")
 					} else {
-						chat_history += sections[i].Content
+						sb.WriteString("[white]")
+						sb.WriteString(sections[i].Content)
 					}
 				}
-				chat_history += "\n"
-				chatView.SetText(chat_history)
+				sb.WriteString("\n")
+				chatView.SetText(sb.String())
 				inputTextArea.SetText("")
 			}()
 		}
